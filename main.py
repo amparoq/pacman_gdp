@@ -3,7 +3,6 @@ from utils import create_map_matrix
 
 # Cargar el mapa desde un archivo de texto
 map_data, posiciones_4 = create_map_matrix("maze1.txt")
-map_data_actual = [row[:] for row in map_data]
 
 # Configuración
 cell_size = 20
@@ -11,7 +10,6 @@ pacman_color = (255, 255, 0)
 wall_color = (0, 0, 255)
 point_color = (255, 255, 255)
 background_color = (0, 0, 0)
-ghosts_background_color = (25, 25, 25)
 door_color = (255, 255, 255)
 
 # Tamaño de la pantalla
@@ -25,22 +23,27 @@ pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
 
-# Encuentra una posición inicial para Pacman
+# Encuentra una posición inicial para Pacman en la cuadrícula
+pacman_grid_x, pacman_grid_y = 0, 0
 for row in range(map_height):
     for col in range(map_width):
         if map_data[row][col] == 0:
-            pacman_x, pacman_y = col * cell_size, row * cell_size
+            pacman_grid_x, pacman_grid_y = col, row
             break
     else:
         continue
     break
 
 # Variables de Pacman
-velocity = 2
 direction = None
 next_direction = None
+speed = 2.5  # Velocidad en píxeles por frame
 
-# Función para verificar si Pacman puede moverse a una posición en la grilla
+# Inicialización de la posición de Pacman en la pantalla
+pacman_screen_x = pacman_grid_x * cell_size
+pacman_screen_y = pacman_grid_y * cell_size
+
+# Función para verificar si Pacman puede moverse a una posición en la cuadrícula
 def can_move(grid_x, grid_y):
     if 0 <= grid_y < len(map_data) and 0 <= grid_x < len(map_data[0]):
         return map_data[grid_y][grid_x] in (0, 1, 2, 4, -4)
@@ -64,12 +67,12 @@ while running:
     elif keys[pygame.K_RIGHT]:
         next_direction = 'right'
 
-    # Coordenadas de Pacman en la grilla
-    pacman_grid_x = int(pacman_x // cell_size)
-    pacman_grid_y = int(pacman_y // cell_size)
+    # Movimiento en la cuadrícula solo si está alineado (si está en una intersección)
+    if pacman_screen_x % cell_size == 0 and pacman_screen_y % cell_size == 0:
+        pacman_grid_x = int(pacman_screen_x // cell_size)
+        pacman_grid_y = int(pacman_screen_y // cell_size)
 
-    # Cambia de dirección solo si está alineado en la cuadrícula
-    if pacman_x % cell_size == 0 and pacman_y % cell_size == 0:
+        # Cambia la dirección solo si la siguiente celda está libre
         if next_direction == 'up' and can_move(pacman_grid_x, pacman_grid_y - 1):
             direction = 'up'
         elif next_direction == 'down' and can_move(pacman_grid_x, pacman_grid_y + 1):
@@ -78,16 +81,26 @@ while running:
             direction = 'left'
         elif next_direction == 'right' and can_move(pacman_grid_x + 1, pacman_grid_y):
             direction = 'right'
+        
+        # Lógica del túnel
+        if map_data[pacman_grid_y][pacman_grid_x] == 4 and direction == 'right':
+            # Teletransportar al otro lado (celda -4)
+            pacman_grid_x = 0  # Índice de -4 en el borde izquierdo
+            pacman_screen_x = pacman_grid_x * cell_size
+        elif map_data[pacman_grid_y][pacman_grid_x] == -4 and direction == 'left':
+            # Teletransportar al otro lado (celda 4)
+            pacman_grid_x = map_width - 1  # Índice de 4 en el borde derecho
+            pacman_screen_x = pacman_grid_x * cell_size
 
     # Mueve a Pacman en la dirección actual si es posible
     if direction == 'up' and can_move(pacman_grid_x, pacman_grid_y - 1):
-        pacman_y -= velocity
+        pacman_screen_y -= speed
     elif direction == 'down' and can_move(pacman_grid_x, pacman_grid_y + 1):
-        pacman_y += velocity
+        pacman_screen_y += speed
     elif direction == 'left' and can_move(pacman_grid_x - 1, pacman_grid_y):
-        pacman_x -= velocity
+        pacman_screen_x -= speed
     elif direction == 'right' and can_move(pacman_grid_x + 1, pacman_grid_y):
-        pacman_x += velocity
+        pacman_screen_x += speed
 
     # Dibujar el mapa
     screen.fill(background_color)
@@ -105,8 +118,8 @@ while running:
             elif cell_value == -1:
                 pygame.draw.rect(screen, door_color, cell_rect)
 
-    # Dibujar a Pacman
-    pacman_rect = pygame.Rect(int(pacman_x), int(pacman_y), cell_size, cell_size)
+    # Dibujar a Pacman en la posición de pantalla correspondiente
+    pacman_rect = pygame.Rect(int(pacman_screen_x), int(pacman_screen_y), cell_size, cell_size)
     pygame.draw.circle(screen, pacman_color, pacman_rect.center, cell_size // 2)
 
     pygame.display.flip()
