@@ -1,5 +1,6 @@
 import pygame
 from utils import create_map_matrix
+from player import Player
 
 # Cargar el mapa desde un archivo de texto
 map_data, posiciones_4 = create_map_matrix("maze1.txt")
@@ -48,6 +49,9 @@ def can_move(grid_x, grid_y):
     if 0 <= grid_y < len(map_data) and 0 <= grid_x < len(map_data[0]):
         return map_data[grid_y][grid_x] in (0, 1, 2, 4, -4)
     return False
+
+# Creamos una instancia de jugador para manejar vidas, nivel y puntos:
+player = Player()
 
 # Bucle principal
 running = True
@@ -101,6 +105,16 @@ while running:
         pacman_screen_x -= speed
     elif direction == 'right' and can_move(pacman_grid_x + 1, pacman_grid_y):
         pacman_screen_x += speed
+
+    # Cambiar el map_data (la matriz) segun la posicion de pacman
+    # Acá se come los pellets
+    if map_data[pacman_grid_y][pacman_grid_x] == 1:
+        map_data[pacman_grid_y][pacman_grid_x] = 0 
+        player.points += 10
+    if map_data[pacman_grid_y][pacman_grid_x] == 2:
+        map_data[pacman_grid_y][pacman_grid_x] = 0 
+        player.points += 50
+        # Aca se maneja la logica del power up (fantasmas escapan y pueden comerse)
 
     # Dibujar el mapa
     screen.fill(background_color)
