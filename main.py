@@ -1,17 +1,12 @@
 import pygame
-from utils import create_map_matrix
+from utils import create_map_matrix, matriz_a_pantalla
 from player import Player
+from constants import cell_size, pacman_color, wall_color, point_color, background_color, door_color, red_ghost_color
+from red_ghost import RedGhost
 
 # Cargar el mapa desde un archivo de texto
 map_data, posiciones_4 = create_map_matrix("maze1.txt")
 
-# Configuración
-cell_size = 20
-pacman_color = (255, 255, 0)
-wall_color = (0, 0, 255)
-point_color = (255, 255, 255)
-background_color = (0, 0, 0)
-door_color = (255, 255, 255)
 
 # Tamaño de la pantalla
 map_height = len(map_data)
@@ -52,6 +47,7 @@ def can_move(grid_x, grid_y):
 
 # Creamos una instancia de jugador para manejar vidas, nivel y puntos:
 player = Player()
+red_ghost = RedGhost()
 
 # Bucle principal
 running = True
@@ -59,6 +55,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            
+    red_ghost.decide_direction(map_data, pacman_grid_x, pacman_grid_y)
+    red_ghost_screen_x, red_ghost_screen_y = matriz_a_pantalla(red_ghost.position_x, red_ghost.position_y, cell_size)
 
     # Detecta las teclas presionadas para cambiar de dirección
     keys = pygame.key.get_pressed()
@@ -105,6 +104,8 @@ while running:
         pacman_screen_x -= speed
     elif direction == 'right' and can_move(pacman_grid_x + 1, pacman_grid_y):
         pacman_screen_x += speed
+    
+    print(red_ghost_screen_x, red_ghost_screen_y)
 
     # Cambiar el map_data (la matriz) segun la posicion de pacman
     # Acá se come los pellets
@@ -135,6 +136,9 @@ while running:
     # Dibujar a Pacman en la posición de pantalla correspondiente
     pacman_rect = pygame.Rect(int(pacman_screen_x), int(pacman_screen_y), cell_size, cell_size)
     pygame.draw.circle(screen, pacman_color, pacman_rect.center, cell_size // 2)
+    
+    red_ghost_rect = pygame.Rect(int(red_ghost_screen_x), int(red_ghost_screen_y), cell_size, cell_size)
+    pygame.draw.circle(screen, red_ghost_color, red_ghost_rect.center, cell_size // 2)
 
     pygame.display.flip()
     clock.tick(30)
