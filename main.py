@@ -56,7 +56,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
             
-    red_ghost.move(map_data, pacman_grid_x, pacman_grid_y)
+    red_ghost.move(map_data, posiciones_4, pacman_grid_x, pacman_grid_y)
     red_ghost_screen_x, red_ghost_screen_y = matriz_a_pantalla(red_ghost.position_x, red_ghost.position_y, cell_size)
 
     # Detecta las teclas presionadas para cambiar de dirección
