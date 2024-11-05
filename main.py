@@ -56,7 +56,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
             
-    red_ghost.decide_direction(map_data, pacman_grid_x, pacman_grid_y)
+    red_ghost.move(map_data, pacman_grid_x, pacman_grid_y)
     red_ghost_screen_x, red_ghost_screen_y = matriz_a_pantalla(red_ghost.position_x, red_ghost.position_y, cell_size)
 
     # Detecta las teclas presionadas para cambiar de dirección
@@ -105,8 +105,6 @@ while running:
     elif direction == 'right' and can_move(pacman_grid_x + 1, pacman_grid_y):
         pacman_screen_x += speed
     
-    print(red_ghost_screen_x, red_ghost_screen_y)
-
     # Cambiar el map_data (la matriz) segun la posicion de pacman
     # Acá se come los pellets
     if map_data[pacman_grid_y][pacman_grid_x] == 1:
