@@ -1,12 +1,13 @@
 import pygame
 from utils import create_map_matrix, matriz_a_pantalla, a_star
 from player import Player
-from constants import cell_size, pacman_color, wall_color, point_color, background_color, door_color, red_ghost_color, pink_ghost_color, orange_ghost_color, blue_ghost_color
+from constants import cell_size, pacman_color, wall_color, point_color, background_color, door_color, red_ghost_color, pink_ghost_color, orange_ghost_color, blue_ghost_color, scatter_mode_color
 from red_ghost import RedGhost
 from pink_ghost import PinkGhost
 from orange_ghost import OrangeGhost
 from blue_ghost import BlueGhost
 from collections import deque
+import time
 
 # Cargar el mapa desde un archivo de texto
 map_data, posiciones_4 = create_map_matrix("maze1.txt")
@@ -145,12 +146,26 @@ pink_ghost = PinkGhost()
 orange_ghost = OrangeGhost()
 blue_ghost = BlueGhost()
 
+red_ghost_house_position = (13, 18)
+pink_ghost_house_position = (14, 18)
+orange_ghost_house_position = (15, 18)
+blue_ghost_house_position = (14, 18)
+
+scatter_mode_start = 0
+
 # Bucle principal
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        
+    if player.level == 1:
+        scatter_mode_duration = 7 # 7 segundos
+    if player.level == 2:
+        scatter_mode_duration = 5 # 5 segundos
+    if player.level == 3:
+        scatter_mode_duration = 3 # 7 segundos  
         
     # Obtener el objetivo para el fantasma rosado
     pink_ghost_target = update_pink_ghost_target(pacman_grid_x, pacman_grid_y, next_direction)
@@ -227,6 +242,7 @@ while running:
     # Acá se come los pellets
     if map_data[pacman_grid_y][pacman_grid_x] == 1:
         map_data[pacman_grid_y][pacman_grid_x] = 0 
+        player.pellets_eaten += 1
         player.points += 10
     if map_data[pacman_grid_y][pacman_grid_x] == 2:
         map_data[pacman_grid_y][pacman_grid_x] = 0 
@@ -236,7 +252,27 @@ while running:
         pink_ghost.scatter_mode = True
         orange_ghost.scatter_mode = True
         blue_ghost.scatter_mode = True
-
+        
+        red_ghost.color = scatter_mode_color
+        pink_ghost.color = scatter_mode_color
+        orange_ghost.color = scatter_mode_color
+        blue_ghost.color = scatter_mode_color
+        scatter_mode_start = time.time()
+    
+    if red_ghost.scatter_mode and (time.time() - scatter_mode_start >= scatter_mode_duration):
+        red_ghost.scatter_mode = False
+        pink_ghost.scatter_mode = False
+        orange_ghost.scatter_mode = False
+        blue_ghost.scatter_mode = False
+        red_ghost.path = []
+        pink_ghost.path = []
+        orange_ghost.path = []
+        blue_ghost.path = []
+        red_ghost.color = red_ghost_color
+        pink_ghost.color = pink_ghost_color
+        orange_ghost.color = orange_ghost_color
+        blue_ghost.color = blue_ghost_color
+        
     # Dibujar el mapa
     screen.fill(background_color)
     for row in range(len(map_data)):
@@ -253,21 +289,69 @@ while running:
             elif cell_value == -1:
                 pygame.draw.rect(screen, door_color, cell_rect)
 
+    # Cuando pacman come al menos 30 de los pellets se libera al fantasma azul
+    if player.pellets_eaten >= 30:
+        blue_ghost.in_house = False
+    
+    # Cuando pacman come al menos un tercio de los pellets (242) se libera al fantasma naranjo
+    if player.pellets_eaten >= 80:
+        orange_ghost.in_house = False
+        orange_ghost.left_house = True
+
     # Dibujar a Pacman en la posición de pantalla correspondiente
     pacman_rect = pygame.Rect(int(pacman_screen_x), int(pacman_screen_y), cell_size, cell_size)
     pygame.draw.circle(screen, pacman_color, pacman_rect.center, cell_size // 2)
     
     red_ghost_rect = pygame.Rect(int(red_ghost_screen_x), int(red_ghost_screen_y), cell_size, cell_size)
-    pygame.draw.circle(screen, red_ghost_color, red_ghost_rect.center, cell_size // 2)
+    pygame.draw.circle(screen, red_ghost.color, red_ghost_rect.center, cell_size // 2)
 
     pink_ghost_rect = pygame.Rect(int(pink_ghost_screen_x), int(pink_ghost_screen_y), cell_size, cell_size)
-    pygame.draw.circle(screen, pink_ghost_color, pink_ghost_rect.center, cell_size // 2)
+    pygame.draw.circle(screen, pink_ghost.color, pink_ghost_rect.center, cell_size // 2)
     
     orange_ghost_rect = pygame.Rect(int(orange_ghost_screen_x), int(orange_ghost_screen_y), cell_size, cell_size)
-    pygame.draw.circle(screen, orange_ghost_color, orange_ghost_rect.center, cell_size // 2)
+    pygame.draw.circle(screen, orange_ghost.color, orange_ghost_rect.center, cell_size // 2)
 
     blue_ghost_rect = pygame.Rect(int(blue_ghost_screen_x), int(blue_ghost_screen_y), cell_size, cell_size)
-    pygame.draw.circle(screen, blue_ghost_color, blue_ghost_rect.center, cell_size // 2)
+    pygame.draw.circle(screen, blue_ghost.color, blue_ghost_rect.center, cell_size // 2)
+    
+    # Detectar colisiones entre Pacman y cada fantasma
+    if pacman_rect.colliderect(red_ghost_rect):
+        if red_ghost.scatter_mode:
+            red_ghost.position_x, red_ghost.position_y = red_ghost_house_position
+            red_ghost_screen_x, red_ghost_screen_y = matriz_a_pantalla(red_ghost.position_x, red_ghost.position_y, cell_size)
+            red_ghost.eaten = True
+            red_ghost.path = []
+            red_ghost_rect = pygame.Rect(int(red_ghost_screen_x), int(red_ghost_screen_y), cell_size, cell_size)
+            pygame.draw.circle(screen, red_ghost.color, red_ghost_rect.center, cell_size // 2)
+        else:
+            # El fantasma se come a pacman
+            pass
+    if pacman_rect.colliderect(pink_ghost_rect):
+        if pink_ghost.scatter_mode:
+            pink_ghost.position_x, pink_ghost.position_y = pink_ghost_house_position
+            pink_ghost_screen_x, pink_ghost_screen_y = matriz_a_pantalla(pink_ghost.position_x, pink_ghost.position_y, cell_size)
+            pink_ghost.eaten = True
+            pink_ghost.path = []
+            pink_ghost_rect = pygame.Rect(int(pink_ghost_screen_x), int(pink_ghost_screen_y), cell_size, cell_size)
+            pygame.draw.circle(screen, pink_ghost.color, pink_ghost_rect.center, cell_size // 2)
+    if pacman_rect.colliderect(orange_ghost_rect):
+        if orange_ghost.scatter_mode:
+            orange_ghost.position_x, orange_ghost.position_y = orange_ghost_house_position
+            orange_ghost_screen_x, orange_ghost_screen_y = matriz_a_pantalla(orange_ghost.position_x, orange_ghost.position_y, cell_size)
+            orange_ghost.eaten = True
+            orange_ghost.path = []
+            orange_ghost_rect = pygame.Rect(int(orange_ghost_screen_x), int(orange_ghost_screen_y), cell_size, cell_size)
+            pygame.draw.circle(screen, orange_ghost.color, orange_ghost_rect.center, cell_size // 2)
+        else:
+            pass
+    if pacman_rect.colliderect(blue_ghost_rect):
+        if blue_ghost.scatter_mode:
+            blue_ghost.position_x, blue_ghost.position_y = blue_ghost_house_position
+            blue_ghost_screen_x, blue_ghost_screen_y = matriz_a_pantalla(blue_ghost.position_x, blue_ghost.position_y, cell_size)
+            blue_ghost.eaten = True
+            blue_ghost.path = []
+            blue_ghost_rect = pygame.Rect(int(blue_ghost_screen_x), int(blue_ghost_screen_y), cell_size, cell_size)
+            pygame.draw.circle(screen, blue_ghost.color, blue_ghost_rect.center, cell_size // 2)
 
     pygame.display.flip()
     clock.tick(30)

@@ -2,6 +2,7 @@ from utils import a_star, heuristic
 
 class RedGhost:
     def __init__(self):
+        self.color = (255, 0, 0)
         self.position_x = 13
         self.position_y = 15
         self.speed = 0.07
@@ -9,9 +10,15 @@ class RedGhost:
         self.current_zone = None
         self.target_position = None
         self.scatter_mode = False
+        self.eaten = False
 
     def move(self, map_data, posiciones_4, pacman_grid_x, pacman_grid_y):
         # Identificar las posiciones de entrada y salida del túnel
+        if self.eaten:
+            self.position_x, self.position_y = (18, 13)
+            self.eaten = False
+        
+            
         tuneles = []
         for pos in posiciones_4:
             tuneles.append((pos[2], pos[1]))
@@ -21,7 +28,7 @@ class RedGhost:
             next_x, next_y = self.path[1] if len(self.path) > 1 else self.path[0]  # La siguiente celda en el camino
 
             # Verificar que el siguiente paso es transitable
-            if map_data[next_x][next_y] not in (8, -1):  # Evitar paredes y obstáculos
+            if map_data[next_x][next_y] not in (8, -2):  # Evitar paredes y obstáculos
                 # Movimiento gradual hacia la siguiente celda
                 if (next_x, next_y) in tuneles:
                     self.position_x, self.position_y = (next_x, next_y)
@@ -41,7 +48,7 @@ class RedGhost:
             if not self.path or len(self.path) == 0:
                 self.path = a_star((int(self.position_x), int(self.position_y)), (int(pacman_grid_y), int(pacman_grid_x)), map_data, posiciones_4)
             
-        if self.scatter_mode:
+        if self.scatter_mode and not self.eaten:
             for pos in posiciones_4:
                 if pos[0] == 4:
                     entrada_tunel = (pos[2], pos[1])

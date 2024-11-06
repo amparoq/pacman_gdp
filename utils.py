@@ -108,7 +108,7 @@ def a_star(start, goal, matriz, posiciones_4):
         for neighbor in neighbors:
             x, y = neighbor
             if 0 <= x < len(matriz) and 0 <= y < len(matriz[0]):  # Asegura que esté dentro de los límites
-                if matriz[x][y] in (0, 1, 2, 4, -4):  # Verifica si la celda es transitable
+                if matriz[x][y] in (0, 1, 2, 4, -4, -1, 3):  # Verifica si la celda es transitable
                     # Coste de movimiento estándar
                     tentative_g_score = g_score[current] + 1
 
@@ -126,4 +126,12 @@ def a_star(start, goal, matriz, posiciones_4):
     return None
 
 # matriz, pos4 = create_map_matrix("maze1.txt")
-# print(a_star((18, 1), (18, 23), matriz, pos4))
+# print(a_star((17, 14), (18, 23), matriz, pos4))
+
+# total_pellets = 0
+# for m in matriz: 
+#     for mi in m:
+#         if mi == 1:
+#             total_pellets += mi
+
+# print(total_pellets)
