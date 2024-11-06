@@ -25,6 +25,7 @@ jobs:
         pip install pyinstaller
 
     - name: Build executable
+      shell: bash
       run: |
         if [[ "${{ matrix.os }}" == 'windows-latest' ]]; then
           pyinstaller --onefile --add-data="gifs;gifs" --add-data="menus;menus" --add-data="maze1.txt;." main.py --name pacman_ampi
