@@ -1,5 +1,8 @@
-jobs:
+name: Build and Package Game
 
+on: [push]
+
+jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -24,9 +27,9 @@ jobs:
     - name: Build executable
       run: |
         if [[ "${{ matrix.os }}" == 'windows-latest' ]]; then
-          pyinstaller --onefile --add-data="gifs;gifs" --add-data="maze1.txt;." main.py --name pacman_ampi
+          pyinstaller --onefile --add-data="gifs;gifs" --add-data="menus;menus" --add-data="maze1.txt;." main.py --name pacman_ampi
         else
-          pyinstaller --onefile --add-data="gifs:gifs" --add-data="maze1.txt:." main.py --name pacman_ampi
+          pyinstaller --onefile --add-data="gifs:gifs" --add-data="menus:menus" --add-data="maze1.txt:." main.py --name pacman_ampi
         fi
 
     - name: Upload artifact
