@@ -4,14 +4,17 @@ on: [push]
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4  # Actualizado a la versión v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v4  # Actualizado a la versión v4
       with:
         python-version: 3.9
 
@@ -23,10 +26,10 @@ jobs:
 
     - name: Build executable
       run: |
-        pyinstaller --onefile --add-data="gifs:gifs" --add-data="maze1.txt:." main.py --name pacman_ampi
+        pyinstaller --onefile --add-data="gifs:gifs" --add-data="maze1.txt:." --windowed --clean main.py --name pacman_ampi
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4  # Actualizado a la versión v4
       with:
         name: pacman_ampi-${{ matrix.os }}
         path: dist/pacman_ampi*
