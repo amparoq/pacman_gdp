@@ -131,7 +131,7 @@ def a_star(start, goal, matriz, posiciones_4):
 # total_pellets = 0
 # for m in matriz: 
 #     for mi in m:
-#         if mi == 1:
-#             total_pellets += mi
+#         if mi == 1 or mi == 2:
+#             total_pellets += 1
 
 # print(total_pellets)

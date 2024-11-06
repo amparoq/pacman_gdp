@@ -36,6 +36,8 @@ speed = 2.5  # Velocidad en píxeles por frame
 pacman_screen_x = pacman_grid_x * cell_size
 pacman_screen_y = pacman_grid_y * cell_size
 
+ghost_captured = 0
+
 # Función para verificar si Pacman puede moverse a una posición en la cuadrícula
 def can_move(grid_x, grid_y):
     if 0 <= grid_y < len(map_data) and 0 <= grid_x < len(map_data[0]):
@@ -152,6 +154,7 @@ orange_ghost_house_position = (15, 18)
 blue_ghost_house_position = (14, 18)
 
 scatter_mode_start = 0
+player_eaten = False
 
 # Bucle principal
 running = True
@@ -159,6 +162,33 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+    
+    if player_eaten:
+        # Reducir una vida de Pacman y comprobar si queda alguna
+        player.lives -= 1
+        if player.lives <= 0:
+            print("¡Game Over!")
+            running = False
+            continue  # Salir del bucle principal si no quedan vidas
+
+        # Reiniciar posiciones de Pacman y fantasmas
+        player_eaten = False  # Restablecer estado de 'player_eaten'
+        pacman_grid_x, pacman_grid_y = 14, 21
+        pacman_screen_x, pacman_screen_y = pacman_grid_x * cell_size, pacman_grid_y * cell_size
+        red_ghost.position_x, red_ghost.position_y = red_ghost_house_position
+        pink_ghost.position_x, pink_ghost.position_y = pink_ghost_house_position
+        orange_ghost.position_x, orange_ghost.position_y = orange_ghost_house_position
+        blue_ghost.position_x, blue_ghost.position_y = blue_ghost_house_position
+
+        # Limpiar el camino y poner a los fantasmas en modo normal
+        for ghost in [red_ghost, pink_ghost, orange_ghost, blue_ghost]:
+            ghost.path = []
+            ghost.eaten = True
+
+        # Pausar un momento para mostrar la pérdida de vida
+        pygame.display.flip()
+        time.sleep(2)
+        continue  # Salta el resto del bucle actual para reiniciar la pantalla
         
     if player.level == 1:
         scatter_mode_duration = 7 # 7 segundos
@@ -272,6 +302,7 @@ while running:
         pink_ghost.color = pink_ghost_color
         orange_ghost.color = orange_ghost_color
         blue_ghost.color = blue_ghost_color
+        ghost_captured = 0
         
     # Dibujar el mapa
     screen.fill(background_color)
@@ -297,6 +328,40 @@ while running:
     if player.pellets_eaten >= 80:
         orange_ghost.in_house = False
         orange_ghost.left_house = True
+    
+    if player.pellets_eaten == 246:
+        print("¡Paso de nivel!")
+        # Reinicio todo
+        player.level += 1
+        if player.level == 3:
+            print("¡Ganaste!")
+        
+        player.pellets_eaten = 0
+        
+        map_data, posiciones_4 = create_map_matrix("maze1.txt")
+        
+        # Reiniciar posiciones de Pacman y fantasmas
+        pacman_grid_x, pacman_grid_y = 14, 21
+        pacman_screen_x, pacman_screen_y = pacman_grid_x * cell_size, pacman_grid_y * cell_size
+        red_ghost.position_x, red_ghost.position_y = red_ghost_house_position
+        pink_ghost.position_x, pink_ghost.position_y = pink_ghost_house_position
+        orange_ghost.position_x, orange_ghost.position_y = orange_ghost_house_position
+        blue_ghost.position_x, blue_ghost.position_y = blue_ghost_house_position
+
+        # Aumento velocidades de fantasmas
+        # Limpiar el camino y poner a los fantasmas en modo normal
+        for ghost in [red_ghost, pink_ghost, orange_ghost, blue_ghost]:
+            ghost.path = []
+            ghost.eaten = True
+            ghost.scatter_mode = False
+            ghost.in_house = True
+            ghost.speed *= 1.1
+
+        # Pausar un momento para mostrar el paso de nivel
+        pygame.display.flip()
+        time.sleep(2)
+        continue 
+        
 
     # Dibujar a Pacman en la posición de pantalla correspondiente
     pacman_rect = pygame.Rect(int(pacman_screen_x), int(pacman_screen_y), cell_size, cell_size)
@@ -317,6 +382,8 @@ while running:
     # Detectar colisiones entre Pacman y cada fantasma
     if pacman_rect.colliderect(red_ghost_rect):
         if red_ghost.scatter_mode:
+            ghost_captured += 1
+            player.points += 200 * ghost_captured
             red_ghost.position_x, red_ghost.position_y = red_ghost_house_position
             red_ghost_screen_x, red_ghost_screen_y = matriz_a_pantalla(red_ghost.position_x, red_ghost.position_y, cell_size)
             red_ghost.eaten = True
@@ -324,18 +391,23 @@ while running:
             red_ghost_rect = pygame.Rect(int(red_ghost_screen_x), int(red_ghost_screen_y), cell_size, cell_size)
             pygame.draw.circle(screen, red_ghost.color, red_ghost_rect.center, cell_size // 2)
         else:
-            # El fantasma se come a pacman
-            pass
+            player_eaten = True
     if pacman_rect.colliderect(pink_ghost_rect):
         if pink_ghost.scatter_mode:
+            ghost_captured += 1
+            player.points += 200 * ghost_captured
             pink_ghost.position_x, pink_ghost.position_y = pink_ghost_house_position
             pink_ghost_screen_x, pink_ghost_screen_y = matriz_a_pantalla(pink_ghost.position_x, pink_ghost.position_y, cell_size)
             pink_ghost.eaten = True
             pink_ghost.path = []
             pink_ghost_rect = pygame.Rect(int(pink_ghost_screen_x), int(pink_ghost_screen_y), cell_size, cell_size)
             pygame.draw.circle(screen, pink_ghost.color, pink_ghost_rect.center, cell_size // 2)
+        else:
+            player_eaten = True
     if pacman_rect.colliderect(orange_ghost_rect):
         if orange_ghost.scatter_mode:
+            ghost_captured += 1
+            player.points += 200 * ghost_captured
             orange_ghost.position_x, orange_ghost.position_y = orange_ghost_house_position
             orange_ghost_screen_x, orange_ghost_screen_y = matriz_a_pantalla(orange_ghost.position_x, orange_ghost.position_y, cell_size)
             orange_ghost.eaten = True
@@ -343,16 +415,19 @@ while running:
             orange_ghost_rect = pygame.Rect(int(orange_ghost_screen_x), int(orange_ghost_screen_y), cell_size, cell_size)
             pygame.draw.circle(screen, orange_ghost.color, orange_ghost_rect.center, cell_size // 2)
         else:
-            pass
+            player_eaten = True
     if pacman_rect.colliderect(blue_ghost_rect):
         if blue_ghost.scatter_mode:
+            ghost_captured += 1
+            player.points += 200 * ghost_captured
             blue_ghost.position_x, blue_ghost.position_y = blue_ghost_house_position
             blue_ghost_screen_x, blue_ghost_screen_y = matriz_a_pantalla(blue_ghost.position_x, blue_ghost.position_y, cell_size)
             blue_ghost.eaten = True
             blue_ghost.path = []
             blue_ghost_rect = pygame.Rect(int(blue_ghost_screen_x), int(blue_ghost_screen_y), cell_size, cell_size)
             pygame.draw.circle(screen, blue_ghost.color, blue_ghost_rect.center, cell_size // 2)
-
+        else:
+            player_eaten = True
     pygame.display.flip()
     clock.tick(30)
 
