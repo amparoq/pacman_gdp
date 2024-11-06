@@ -4,17 +4,16 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest]
+    runs-on: macos-latest
+    env:
+      ARCHFLAGS: "-arch x86_64"  # Fuerza la arquitectura x86_64
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4  # Actualizado a la versión v4
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4  # Actualizado a la versión v4
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
 
@@ -29,7 +28,7 @@ jobs:
         pyinstaller --onefile --add-data="gifs:gifs" --add-data="maze1.txt:." main.py --name pacman_ampi
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4  # Actualizado a la versión v4
+      uses: actions/upload-artifact@v4
       with:
         name: pacman_ampi-${{ matrix.os }}
         path: dist/pacman_ampi*
