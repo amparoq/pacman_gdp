@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [windows-latest]
 
     steps:
     - name: Checkout code
@@ -27,11 +27,8 @@ jobs:
     - name: Build executable
       shell: bash
       run: |
-        if [[ "${{ matrix.os }}" == 'windows-latest' ]]; then
-          pyinstaller --onefile --add-data="gifs;gifs" --add-data="menus;menus" --add-data="maze1.txt;." main.py --name pacman_ampi
-        else
-          pyinstaller --onefile --add-data="gifs:gifs" --add-data="menus:menus" --add-data="maze1.txt:." main.py --name pacman_ampi
-        fi
+        pyinstaller --onefile --add-data="gifs;gifs" --add-data="menus;menus" --add-data="maze1.txt;." main.py --name pacman_ampi
+
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
