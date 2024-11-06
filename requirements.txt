@@ -1,0 +1,2 @@
+pygame
+gif-pygame

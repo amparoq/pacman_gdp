@@ -9,10 +9,24 @@ from orange_ghost import OrangeGhost
 from blue_ghost import BlueGhost
 from collections import deque
 import time
+import os
+import sys
+
+def resource_path(relative_path):
+    """Obtiene la ruta de un recurso empaquetado o en desarrollo"""
+    if getattr(sys, 'frozen', False):
+        # Ejecutable
+        base_path = sys._MEIPASS
+    else:
+        # Código fuente
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+gifs_path = resource_path("gifs")
+images_path = resource_path("images")
 
 # Cargar el mapa desde un archivo de texto
 map_data, posiciones_4 = create_map_matrix("maze1.txt")
-
 
 # Tamaño de la pantalla
 map_height = len(map_data)
@@ -169,35 +183,35 @@ orange_ghost = OrangeGhost()
 blue_ghost = BlueGhost()
 
 # Animaciones:
-pacman_animations = {"right": gif_pygame.load("gifs/pacman_right.gif"), 
-                     "left": gif_pygame.load("gifs/pacman_left.gif"),
-                     "down": gif_pygame.load("gifs/pacman_down.gif"),
-                     "up": gif_pygame.load("gifs/pacman_up.gif")}
+pacman_animations = {"right": gif_pygame.load(os.path.join(gifs_path, "pacman_right.gif")), 
+                     "left": gif_pygame.load(os.path.join(gifs_path, "pacman_left.gif")),
+                     "down": gif_pygame.load(os.path.join(gifs_path,"pacman_down.gif")),
+                     "up": gif_pygame.load(os.path.join(gifs_path,"pacman_up.gif"))}
 
-red_ghost_animations = {"right": gif_pygame.load("gifs/red_ghost_right.gif"), 
-                     "left": gif_pygame.load("gifs/red_ghost_left.gif")}
+red_ghost_animations = {"right": gif_pygame.load(os.path.join(gifs_path, "red_ghost_right.gif")), 
+                     "left": gif_pygame.load(os.path.join(gifs_path, "red_ghost_left.gif"))}
 
-pink_ghost_animations = {"right": gif_pygame.load("gifs/pink_ghost_right.gif"), 
-                     "left": gif_pygame.load("gifs/pink_ghost_left.gif")}
+pink_ghost_animations = {"right": gif_pygame.load(os.path.join(gifs_path, "pink_ghost_right.gif")), 
+                     "left": gif_pygame.load(os.path.join(gifs_path, "pink_ghost_left.gif"))}
 
-red_ghost_animations = {"right": gif_pygame.load("gifs/red_ghost_right.gif"), 
-                     "left": gif_pygame.load("gifs/red_ghost_left.gif")}
+red_ghost_animations = {"right": gif_pygame.load(os.path.join(gifs_path, "red_ghost_right.gif")), 
+                     "left": gif_pygame.load(os.path.join(gifs_path, "red_ghost_left.gif"))}
 
-pink_ghost_animations = {"right": gif_pygame.load("gifs/pink_ghost_right.gif"), 
-                     "left": gif_pygame.load("gifs/pink_ghost_left.gif")}
+pink_ghost_animations = {"right": gif_pygame.load(os.path.join(gifs_path, "pink_ghost_right.gif")), 
+                     "left": gif_pygame.load(os.path.join(gifs_path, "pink_ghost_left.gif"))}
 
-orange_ghost_animations = {"right": gif_pygame.load("gifs/orange_ghost_right.gif"), 
-                     "left": gif_pygame.load("gifs/orange_ghost_left.gif")}
+orange_ghost_animations = {"right": gif_pygame.load(os.path.join(gifs_path, "orange_ghost_right.gif")), 
+                     "left": gif_pygame.load(os.path.join(gifs_path, "orange_ghost_left.gif"))}
 
-blue_ghost_animations = {"right": gif_pygame.load("gifs/blue_ghost_right.gif"), 
-                     "left": gif_pygame.load("gifs/blue_ghost_left.gif")}
+blue_ghost_animations = {"right": gif_pygame.load(os.path.join(gifs_path, "blue_ghost_right.gif")), 
+                     "left": gif_pygame.load(os.path.join(gifs_path, "blue_ghost_left.gif"))}
 
-scatter_ghost_animations = {"right": gif_pygame.load("gifs/eatable_ghost_right.gif"), 
-                     "left": gif_pygame.load("gifs/eatable_ghost_left.gif")}
+scatter_ghost_animations = {"right": gif_pygame.load(os.path.join(gifs_path, "eatable_ghost_right.gif")), 
+                     "left": gif_pygame.load(os.path.join(gifs_path, "eatable_ghost_left.gif"))}
 
-pacman_death_gif = gif_pygame.load("gifs/pacman_death.gif")
+pacman_death_gif = gif_pygame.load(os.path.join(gifs_path, "pacman_death.gif"))
 
-ghost_eaten_gif = gif_pygame.load("gifs/eaten_ghost.gif")
+ghost_eaten_gif = gif_pygame.load(os.path.join(gifs_path, "eaten_ghost.gif"))
 
 # Calcular el tiempo total de duración de la animación
 death_animation_duration = sum(pacman_death_gif.get_durations())
