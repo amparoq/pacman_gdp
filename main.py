@@ -23,7 +23,10 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 gifs_path = resource_path("gifs")
-images_path = resource_path("images")
+images_path = resource_path("menus")
+
+#Cargar imagen de fondo
+background_image = pygame.image.load(os.path.join(images_path, "game_over.png"))
 
 # Cargar el mapa desde un archivo de texto
 map_data, posiciones_4 = create_map_matrix("maze1.txt")
@@ -38,6 +41,12 @@ screen_height = map_height * cell_size
 pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
+
+#Constantes para el botón
+BUTTON_WIDTH = 200
+BUTTON_HEIGHT = 50
+BUTTON_X = 100
+BUTTON_Y = 370
 
 # Encuentra una posición inicial para Pacman en la cuadrícula
 pacman_grid_x, pacman_grid_y = 14, 21
@@ -174,6 +183,33 @@ def update_blue_ghost_target(pacman_x, pacman_y, red_ghost, next_direction):
 
     return final_target
 
+#Función para dibujar el botón
+def draw_button(text, x, y, width, height, color, hover_color):
+    # Obtener la posición del ratón
+    mouse_pos = pygame.mouse.get_pos()
+    mouse_click = pygame.mouse.get_pressed()  # Obtiene el estado de los botones del ratón
+    
+    # Detectar si el mouse está sobre el botón
+    if x < mouse_pos[0] < x + width and y < mouse_pos[1] < y + height:
+        pygame.draw.rect(screen, hover_color, (x, y, width, height))
+        if mouse_click[0] == 1:
+            # Acción al hacer clic en el botón
+            if text == "Volver a jugar":
+                # Reiniciar el juego
+                reset_game()
+            elif text == "Salir":
+                # Salir del juego
+                pygame.quit()
+                exit()
+    else:
+        pygame.draw.rect(screen, color, (x, y, width, height))
+    
+    # Dibujar el texto del botón
+    font = pygame.font.Font(None, 36)
+    text_surface = font.render(text, True, (255, 255, 255))
+    text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
+    screen.blit(text_surface, text_rect)
+
 
 # Creamos una instancia de jugador para manejar vidas, nivel y puntos:
 player = Player()
@@ -254,10 +290,34 @@ while running:
             player.lives -= 1
 
             if player.lives <= 0:
+                # Dibujar el fondo
+                screen.blit(background_image, (0, 0))
+                # Mostrar "Game Over" en el centro de la pantalla
+                font = pygame.font.SysFont(None, 72)  # Tamaño de la fuente más grande
+                game_over_text = font.render("Game Over", True, (255, 255, 0))
+                
+                # Obtener el tamaño del texto para centrarlo
+                text_rect = game_over_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+                
+                # Dibujar el texto en el centro
+                screen.blit(game_over_text, text_rect)
+                
+                # Dibujar los botones
+                draw_button("Volver a jugar", 50, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (0, 255, 0), (0, 200, 0))
+                draw_button("Salir", 300, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (255, 0, 0), (200, 0, 0))
+                
+                pygame.display.flip()
+                clock.tick(30)
+
+                pygame.time.delay(10000)
+
                 print("¡Game Over!")
                 running = False
+                continue  # Salir del bucle principal si no quedan vidas
             else:
                 # Reinicia posiciones de Pacman y fantasmas
+                direction = None
+                next_direction = None
                 pacman_grid_x, pacman_grid_y = 14, 21
                 pacman_screen_x, pacman_screen_y = pacman_grid_x * cell_size, pacman_grid_y * cell_size
                 direction = "right"

@@ -1,10 +1,9 @@
-name: Build and Package Pygame App
-
-on: [push]
-
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
 
     steps:
     - name: Checkout code
@@ -23,7 +22,11 @@ jobs:
 
     - name: Build executable
       run: |
-        pyinstaller --onefile --add-data="gifs:gifs" --add-data="maze1.txt:." main.py --name pacman_ampi
+        if [[ "${{ matrix.os }}" == 'windows-latest' ]]; then
+          pyinstaller --onefile --add-data="gifs;gifs" --add-data="maze1.txt;." main.py --name pacman_ampi
+        else
+          pyinstaller --onefile --add-data="gifs:gifs" --add-data="maze1.txt:." main.py --name pacman_ampi
+        fi
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
