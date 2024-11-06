@@ -11,6 +11,8 @@ class RedGhost:
         self.target_position = None
         self.scatter_mode = False
         self.eaten = False
+        self.direction = "right"
+        self.animate_going_home = False
 
     def move(self, map_data, posiciones_4, pacman_grid_x, pacman_grid_y):
         # Identificar las posiciones de entrada y salida del túnel
@@ -18,7 +20,6 @@ class RedGhost:
             self.position_x, self.position_y = (18, 13)
             self.eaten = False
         
-            
         tuneles = []
         for pos in posiciones_4:
             tuneles.append((pos[2], pos[1]))
@@ -35,8 +36,12 @@ class RedGhost:
                 if abs(self.position_x - next_x) > self.speed:
                     self.position_x += self.speed if next_x > self.position_x else -self.speed
                 elif abs(self.position_y - next_y) > self.speed:
-                    self.position_y += self.speed if next_y > self.position_y else -self.speed
-
+                    if next_y > self.position_y:
+                        self.position_y += self.speed
+                        self.direction = "right" 
+                    else:
+                        self.position_y -= self.speed 
+                        self.direction = "left" 
                 # Cuando se alcanza la siguiente celda, ajustar la posición
                 if (int(round(self.position_x)), int(round(self.position_y))) == (next_x, next_y):
                     self.last_cell = (int(round(self.position_x)), int(round(self.position_y)))  # Guarda la posición actual como última
