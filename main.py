@@ -276,6 +276,7 @@ while running:
         player.points += 10
     if map_data[pacman_grid_y][pacman_grid_x] == 2:
         map_data[pacman_grid_y][pacman_grid_x] = 0 
+        player.pellets_eaten += 1
         player.points += 50
         # Aca se maneja la logica del power up (fantasmas escapan y pueden comerse)
         red_ghost.scatter_mode = True
@@ -428,6 +429,7 @@ while running:
             pygame.draw.circle(screen, blue_ghost.color, blue_ghost_rect.center, cell_size // 2)
         else:
             player_eaten = True
+    
     pygame.display.flip()
     clock.tick(30)
 

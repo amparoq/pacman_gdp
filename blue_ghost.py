@@ -18,36 +18,38 @@ class BlueGhost:
         if self.eaten:
             self.position_x, self.position_y = (18, 11)
             self.eaten = False
-        # Identificar las posiciones de entrada y salida del túnel
-        if not self.in_house:
-            tuneles = []
-            for pos in posiciones_4:
-                tuneles.append((pos[2], pos[1]))
             
-            # Movimiento hacia el siguiente paso en el camino al objetivo
-            if self.path and len(self.path) != 0:
-                next_x, next_y = self.path[1] if len(self.path) > 1 else self.path[0]  # La siguiente celda en el camino
+        if not self.in_house:
+            tuneles = [(pos[2], pos[1]) for pos in posiciones_4]
 
-                # Verificar que el siguiente paso es transitable
-                if map_data[next_x][next_y] not in (8, -2):  # Evitar paredes y obstáculos
-                    # Movimiento gradual hacia la siguiente celda
+            if self.path:
+                next_x, next_y = self.path[1] if len(self.path) > 1 else self.path[0]
+
+                if map_data[next_x][next_y] not in (8, -2):
                     if (next_x, next_y) in tuneles:
                         self.position_x, self.position_y = (next_x, next_y)
-                    if abs(self.position_x - next_x) > self.speed:
-                        self.position_x += self.speed if next_x > self.position_x else -self.speed
-                    elif abs(self.position_y - next_y) > self.speed:
-                        self.position_y += self.speed if next_y > self.position_y else -self.speed
-
-                    # Cuando se alcanza la siguiente celda, ajustar la posición
-                    if (int(round(self.position_x)), int(round(self.position_y))) == (next_x, next_y):
-                        self.last_cell = (int(round(self.position_x)), int(round(self.position_y)))  # Guarda la posición actual como última
+                    elif abs(self.position_x - next_x) < 0.1 and abs(self.position_y - next_y) < 0.1:
                         self.position_x, self.position_y = next_x, next_y
-                        del self.path[0]  # Elimina la celda completada del camino
+                        if self.path:
+                            del self.path[0]
+                    else:
+                        if abs(self.position_x - next_x) > self.speed:
+                            self.position_x += self.speed if next_x > self.position_x else -self.speed
+                        elif abs(self.position_y - next_y) > self.speed:
+                            self.position_y += self.speed if next_y > self.position_y else -self.speed
+
+                    if (int(round(self.position_x)), int(round(self.position_y))) == (next_x, next_y):
+                        self.last_cell = (int(round(self.position_x)), int(round(self.position_y)))
+                        self.position_x, self.position_y = next_x, next_y
+                        if self.path:
+                            del self.path[0]
             
-            # Si el camino se vacía, recalcula hacia la posición actual de Pacman
-            if not self.scatter_mode:
-                if not self.path or len(self.path) == 0:
-                    self.path = a_star((int(self.position_x), int(self.position_y)), (int(pacman_grid_y), int(pacman_grid_x)), map_data, posiciones_4)
+            # Si el camino se vacía y no estamos en modo de dispersión, recalcula el camino solo una vez
+            if not self.scatter_mode and not self.path:
+                print("Recalculando camino hacia Pacman")
+                self.path = a_star((int(self.position_x), int(self.position_y)), 
+                                   (int(pacman_grid_y), int(pacman_grid_x)), 
+                                   map_data, posiciones_4)
 
             if self.scatter_mode and not self.eaten:
                 for pos in posiciones_4:
@@ -55,7 +57,8 @@ class BlueGhost:
                         entrada_tunel = (pos[2], pos[1])
                     elif pos[0] == -4:
                         salida_tunel = (pos[2], pos[1])
-                if not self.path or len(self.path) == 0:
+                
+                if not self.path:
                     if heuristic((int(self.position_x), int(self.position_y)), (33, 26), entrada_tunel, salida_tunel) > 2:
                         self.path = a_star((int(self.position_x), int(self.position_y)), (33, 26), map_data, posiciones_4)
                     else:
@@ -64,18 +67,22 @@ class BlueGhost:
                         self.path = a_star((int(self.position_x), int(self.position_y)), (27, 20), map_data, posiciones_4)
                     else:
                         self.path = a_star((int(self.position_x), int(self.position_y)), (33, 26), map_data, posiciones_4)
+        
         else:
             if self.moving_down:
-                next_x, next_y = 19, 11  # Objetivo de abajo
+                next_x, next_y = 19, 11
             else:
-                next_x, next_y = 17, 11  # Objetivo de arriba
+                next_x, next_y = 17, 11
 
-            # Movimiento gradual hacia la siguiente celda
-            if abs(self.position_x - next_x) > self.speed:
+            if abs(self.position_x - next_x) < 0.1:
+                self.position_x = next_x
+            else:
                 self.position_x += self.speed if next_x > self.position_x else -self.speed
-            elif abs(self.position_y - next_y) > self.speed:
+            
+            if abs(self.position_y - next_y) < 0.1:
+                self.position_y = next_y
+            else:
                 self.position_y += self.speed if next_y > self.position_y else -self.speed
 
-            # Cambiar de dirección si alcanza el objetivo
             if int(round(self.position_x)) == next_x and int(round(self.position_y)) == next_y:
-                self.moving_down = not self.moving_down  # Alterna la dirección
+                self.moving_down = not self.moving_down
