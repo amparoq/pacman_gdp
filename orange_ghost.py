@@ -14,11 +14,14 @@ class OrangeGhost:
         self.moving_down = True
         self.left_house = False
         self.eaten = False
+        self.direction = "right"
+        self.animate_going_home = False
 
     def move(self, map_data, posiciones_4, pacman_grid_x, pacman_grid_y):
         if self.eaten:
             self.position_x, self.position_y = (18, 15)
             self.eaten = False
+            
         if not self.in_house:
             # Identificar las posiciones de entrada y salida del túnel
             tuneles = []
@@ -37,7 +40,12 @@ class OrangeGhost:
                     if abs(self.position_x - next_x) > self.speed:
                         self.position_x += self.speed if next_x > self.position_x else -self.speed
                     elif abs(self.position_y - next_y) > self.speed:
-                        self.position_y += self.speed if next_y > self.position_y else -self.speed
+                        if next_y > self.position_y:
+                            self.position_y += self.speed
+                            self.direction = "right" 
+                        else:
+                            self.position_y -= self.speed 
+                            self.direction = "left" 
 
                     # Cuando se alcanza la siguiente celda, ajustar la posición
                     if (int(round(self.position_x)), int(round(self.position_y))) == (next_x, next_y):
