@@ -23,7 +23,10 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 gifs_path = resource_path("gifs")
-images_path = resource_path("images")
+images_path = resource_path("menus")
+
+#Cargar imagen de fondo
+background_image = pygame.image.load(os.path.join(images_path, "game_over.png"))
 
 # Cargar el mapa desde un archivo de texto
 map_data, posiciones_4 = create_map_matrix("maze1.txt")
@@ -42,7 +45,6 @@ screen_height = map_height * cell_size
 pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
-
 
 #Constantes para el botón
 BUTTON_WIDTH = 200
@@ -213,6 +215,7 @@ def draw_button(text, x, y, width, height, color, hover_color):
     text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
     screen.blit(text_surface, text_rect)
 
+
 def reset_game():
     # Aquí debes colocar el código para reiniciar el juego, como:
     # - Restablecer las posiciones de Pacman y los fantasmas
@@ -342,10 +345,34 @@ while running:
             player.lives -= 1
 
             if player.lives <= 0:
+                # Dibujar el fondo
+                screen.blit(background_image, (0, 0))
+                # Mostrar "Game Over" en el centro de la pantalla
+                font = pygame.font.SysFont(None, 72)  # Tamaño de la fuente más grande
+                game_over_text = font.render("Game Over", True, (255, 255, 0))
+                
+                # Obtener el tamaño del texto para centrarlo
+                text_rect = game_over_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+                
+                # Dibujar el texto en el centro
+                screen.blit(game_over_text, text_rect)
+                
+                # Dibujar los botones
+                draw_button("Volver a jugar", 50, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (0, 255, 0), (0, 200, 0))
+                draw_button("Salir", 300, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (255, 0, 0), (200, 0, 0))
+                
+                pygame.display.flip()
+                clock.tick(30)
+
+                pygame.time.delay(10000)
+
                 print("¡Game Over!")
                 running = False
+                continue  # Salir del bucle principal si no quedan vidas
             else:
                 # Reinicia posiciones de Pacman y fantasmas
+                direction = None
+                next_direction = None
                 pacman_grid_x, pacman_grid_y = 14, 21
                 pacman_screen_x, pacman_screen_y = pacman_grid_x * cell_size, pacman_grid_y * cell_size
                 direction = "right"
