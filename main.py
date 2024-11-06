@@ -29,7 +29,7 @@ images_path = resource_path("menus")
 background_image = pygame.image.load(os.path.join(images_path, "game_over.png"))
 
 # Cargar el mapa desde un archivo de texto
-map_data, posiciones_4 = create_map_matrix("maze1.txt")
+map_data, posiciones_4 = create_map_matrix(resource_path("maze1.txt"))
 
 
 #Cargar imagen de fondo
@@ -535,7 +535,7 @@ while running:
         
         player.pellets_eaten = 0
         
-        map_data, posiciones_4 = create_map_matrix("maze1.txt")
+        map_data, posiciones_4 = create_map_matrix(resource_path("maze1.txt"))
         
         # Reiniciar posiciones de Pacman y fantasmas
         pacman_grid_x, pacman_grid_y = 14, 21
