@@ -1,6 +1,6 @@
 from utils import a_star, heuristic
 
-class RedGhost:
+class PinkGhost:
     def __init__(self):
         self.position_x = 13
         self.position_y = 15
@@ -48,11 +48,11 @@ class RedGhost:
                 elif pos[0] == -4:
                     salida_tunel = (pos[2], pos[1])
             if not self.path or len(self.path) == 0:
-                if heuristic((int(self.position_x), int(self.position_y)), (5, 26), entrada_tunel, salida_tunel) > 2:
-                    self.path = a_star((int(self.position_x), int(self.position_y)), (5, 26), map_data, posiciones_4)
+                if heuristic((int(self.position_x), int(self.position_y)), (5, 1), entrada_tunel, salida_tunel) > 2:
+                    self.path = a_star((int(self.position_x), int(self.position_y)), (5, 1), map_data, posiciones_4)
                 else:
-                    self.path = a_star((int(self.position_x), int(self.position_y)), (9, 24), map_data, posiciones_4)
-                if heuristic((int(self.position_x), int(self.position_y)), (9, 24), entrada_tunel, salida_tunel) > 2:
-                    self.path = a_star((int(self.position_x), int(self.position_y)), (9, 24), map_data, posiciones_4)
+                    self.path = a_star((int(self.position_x), int(self.position_y)), (9, 4), map_data, posiciones_4)
+                if heuristic((int(self.position_x), int(self.position_y)), (9, 4), entrada_tunel, salida_tunel) > 2:
+                    self.path = a_star((int(self.position_x), int(self.position_y)), (9, 4), map_data, posiciones_4)
                 else:
-                    self.path = a_star((int(self.position_x), int(self.position_y)), (5, 26), map_data, posiciones_4)
+                    self.path = a_star((int(self.position_x), int(self.position_y)), (5, 1), map_data, posiciones_4)

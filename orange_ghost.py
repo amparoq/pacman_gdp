@@ -1,6 +1,6 @@
 from utils import a_star, heuristic
 
-class RedGhost:
+class OrangeGhost:
     def __init__(self):
         self.position_x = 13
         self.position_y = 15
@@ -40,7 +40,10 @@ class RedGhost:
         if not self.scatter_mode:
             if not self.path or len(self.path) == 0:
                 self.path = a_star((int(self.position_x), int(self.position_y)), (int(pacman_grid_y), int(pacman_grid_x)), map_data, posiciones_4)
-            
+                # Si la distancia es menos de 8 celdas, se mueve hacia su corner.
+                if len(self.path) < 8:
+                    self.path = a_star((int(self.position_x), int(self.position_y)), (33, 1), map_data, posiciones_4)
+                    
         if self.scatter_mode:
             for pos in posiciones_4:
                 if pos[0] == 4:
@@ -48,11 +51,11 @@ class RedGhost:
                 elif pos[0] == -4:
                     salida_tunel = (pos[2], pos[1])
             if not self.path or len(self.path) == 0:
-                if heuristic((int(self.position_x), int(self.position_y)), (5, 26), entrada_tunel, salida_tunel) > 2:
-                    self.path = a_star((int(self.position_x), int(self.position_y)), (5, 26), map_data, posiciones_4)
+                if heuristic((int(self.position_x), int(self.position_y)), (33, 1), entrada_tunel, salida_tunel) > 2:
+                    self.path = a_star((int(self.position_x), int(self.position_y)), (33, 1), map_data, posiciones_4)
                 else:
-                    self.path = a_star((int(self.position_x), int(self.position_y)), (9, 24), map_data, posiciones_4)
-                if heuristic((int(self.position_x), int(self.position_y)), (9, 24), entrada_tunel, salida_tunel) > 2:
-                    self.path = a_star((int(self.position_x), int(self.position_y)), (9, 24), map_data, posiciones_4)
+                    self.path = a_star((int(self.position_x), int(self.position_y)), (27, 7), map_data, posiciones_4)
+                if heuristic((int(self.position_x), int(self.position_y)), (27, 7), entrada_tunel, salida_tunel) > 2:
+                    self.path = a_star((int(self.position_x), int(self.position_y)), (27, 7), map_data, posiciones_4)
                 else:
-                    self.path = a_star((int(self.position_x), int(self.position_y)), (5, 26), map_data, posiciones_4)
+                    self.path = a_star((int(self.position_x), int(self.position_y)), (33, 1), map_data, posiciones_4)
