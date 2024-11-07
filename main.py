@@ -30,8 +30,8 @@ background_image = pygame.image.load(os.path.join(images_path, "game_over.png"))
 
 
 #Cargar imagen de fondo
-background_image = pygame.image.load("game_over.png")
-start_screen_image = pygame.image.load("start.png")
+#background_image = pygame.image.load("game_over.png")
+start_screen_image = pygame.image.load(os.path.join(images_path, "start.png"))
 
 
 GREEN = (0, 255, 0)
@@ -42,7 +42,7 @@ DARK_RED = (200, 0, 0)
 # Dimensiones de los botones
 START_BUTTON_X, START_BUTTON_Y = 110, 250
 START_BUTTON_WIDTH, START_BUTTON_HEIGHT = 150, 50
-EXIT_BUTTON_X, EXIT_BUTTON_Y = 280, 250
+EXIT_BUTTON_X, EXIT_BUTTON_Y = 330, 250
 EXIT_BUTTON_WIDTH, EXIT_BUTTON_HEIGHT = 150, 50
 
 
