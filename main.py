@@ -397,12 +397,14 @@ while running:
         clock.tick(30)
     if game_started:
         idle_sound.play()
+        idle_sound.stop()
         # Si Pacman ha sido comido, iniciar la animación de muerte
         if player_eaten and not death_animation_playing:
             death_animation_start_time = time.time()  # Registrar el tiempo de inicio de la animación
             death_animation_playing = True  # Activar el estado de animación
             pacman_death_gif.reset()  # Reiniciar el GIF al primer fotograma
             death_sound.play()
+            death_sound.stop()
         # Reproduce la animación de muerte si está activa
         if death_animation_playing:
             pacman_death_gif.render(screen, (pacman_screen_x - 7, pacman_screen_y - 7))
@@ -603,6 +605,7 @@ while running:
         # Acá se come los pellets
         if map_data[pacman_grid_y][pacman_grid_x] == 1:
             waka_sound.play()
+            waka_sound.stop()
             map_data[pacman_grid_y][pacman_grid_x] = 0 
             player.pellets_eaten += 1
             player.points += 10
@@ -618,7 +621,6 @@ while running:
             blue_ghost.scatter_mode = True
             
             scatter_mode_start = time.time()
-            power_pellet_sound.play()
         
         if red_ghost.scatter_mode and (time.time() - scatter_mode_start >= scatter_mode_duration):
             red_ghost.scatter_mode = False
@@ -632,6 +634,7 @@ while running:
             ghost_captured = 0
         else:
             power_pellet_sound.play()
+            power_pellet_sound.stop()
             
         # Dibujar el mapa
         screen.fill(background_color)
@@ -752,6 +755,7 @@ while running:
         if pacman_rect.colliderect(red_ghost_rect):
             if red_ghost.scatter_mode:
                 ghost_eating_sound.play()
+                ghost_eating_sound.stop()
                 ghost_captured += 1
                 player.points += 200 * ghost_captured
                 red_ghost.animate_going_home = True
@@ -761,6 +765,7 @@ while running:
         if pacman_rect.colliderect(pink_ghost_rect):
             if pink_ghost.scatter_mode:
                 ghost_eating_sound.play()
+                ghost_eating_sound.stop()
                 ghost_captured += 1
                 player.points += 200 * ghost_captured
                 pink_ghost.animate_going_home = True
@@ -770,6 +775,7 @@ while running:
         if pacman_rect.colliderect(orange_ghost_rect):
             if orange_ghost.scatter_mode:
                 ghost_eating_sound.play()
+                ghost_eating_sound.stop()
                 ghost_captured += 1
                 player.points += 200 * ghost_captured
                 orange_ghost.animate_going_home = True
@@ -779,6 +785,7 @@ while running:
         if pacman_rect.colliderect(blue_ghost_rect):
             if blue_ghost.scatter_mode:
                 ghost_eating_sound.play()
+                ghost_eating_sound.stop()
                 ghost_captured += 1
                 player.points += 200 * ghost_captured
                 blue_ghost.animate_going_home = True
@@ -790,15 +797,19 @@ while running:
         if red_ghost.animate_going_home:
             move_ghost_to_house(red_ghost, red_ghost_house_position, ghost_eaten_gif)
             ghost_eaten_sound.play()
+            ghost_eaten_sound.stop()
         if pink_ghost.animate_going_home:
             move_ghost_to_house(pink_ghost, pink_ghost_house_position, ghost_eaten_gif)
             ghost_eaten_sound.play()
+            ghost_eaten_sound.stop()
         if orange_ghost.animate_going_home:
             move_ghost_to_house(orange_ghost, orange_ghost_house_position, ghost_eaten_gif)
             ghost_eaten_sound.play()
+            ghost_eaten_sound.stop()
         if blue_ghost.animate_going_home:
             move_ghost_to_house(blue_ghost, blue_ghost_house_position, ghost_eaten_gif)
             ghost_eaten_sound.play()
+            ghost_eaten_sound.stop()
 
         draw_hud()
         
