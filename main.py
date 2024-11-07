@@ -36,12 +36,14 @@ start_screen_image = pygame.image.load(os.path.join(images_path,"start.png"))
 
 
 # Load sound effects
-death_sound = pygame.mixer.Sound(os.path.join(images_path, "death.mp3"))
-ghost_eaten_sound = pygame.mixer.Sound(os.path.join(images_path, "ghost_eaten.mp3"))
-ghost_eating_sound = pygame.mixer.Sound(os.path.join(images_path, "ghost_eating.mp3"))
-power_pellet_sound = pygame.mixer.Sound(os.path.join(images_path, "power_pellet.mp3"))
-waka_sound = pygame.mixer.Sound(os.path.join(images_path, "wakawakaish.mp3"))
-idle_sound =  pygame.mixer.Sound(os.path.join(images_path, "idle.mp3"))
+pygame.mixer.init()
+
+death_sound = pygame.mixer.Sound(os.path.join(sfx_path, "death.mp3"))
+ghost_eaten_sound = pygame.mixer.Sound(os.path.join(sfx_path, "ghost_eaten.mp3"))
+ghost_eating_sound = pygame.mixer.Sound(os.path.join(sfx_path, "ghost_eating.mp3"))
+power_pellet_sound = pygame.mixer.Sound(os.path.join(sfx_path, "power_pellet.mp3"))
+waka_sound = pygame.mixer.Sound(os.path.join(sfx_path, "wakawakaish.mp3"))
+idle_sound =  pygame.mixer.Sound(os.path.join(sfx_path, "idle.mp3"))
 
 GREEN = (0, 255, 0)
 DARK_GREEN = (0, 200, 0)
