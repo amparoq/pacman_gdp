@@ -28,26 +28,16 @@ images_path = resource_path("menus")
 #Cargar imagen de fondo
 background_image = pygame.image.load(os.path.join(images_path, "game_over.png"))
 
-# Cargar el mapa desde un archivo de texto
-map_data, posiciones_4 = create_map_matrix(resource_path("maze1.txt"))
-
 
 #Cargar imagen de fondo
 background_image = pygame.image.load("game_over.png")
 start_screen_image = pygame.image.load("start.png")
 
 
-# Tamaño de la pantalla
-map_height = len(map_data)
-map_width = len(map_data[0])
-screen_width = map_width * cell_size
-screen_height = map_height * cell_size
-
 GREEN = (0, 255, 0)
 DARK_GREEN = (0, 200, 0)
 RED = (255, 0, 0)
 DARK_RED = (200, 0, 0)
-
 
 # Dimensiones de los botones
 START_BUTTON_X, START_BUTTON_Y = 110, 250
@@ -55,10 +45,6 @@ START_BUTTON_WIDTH, START_BUTTON_HEIGHT = 150, 50
 EXIT_BUTTON_X, EXIT_BUTTON_Y = 280, 250
 EXIT_BUTTON_WIDTH, EXIT_BUTTON_HEIGHT = 150, 50
 
-# Inicializa Pygame
-pygame.init()
-screen = pygame.display.set_mode((screen_width, screen_height))
-clock = pygame.time.Clock()
 
 #Constantes para el botón
 BUTTON_WIDTH = 200
@@ -158,12 +144,37 @@ def is_transitable(x, y, map_data):
     return False
 
 
+def draw_hud():
+    # Colores y fuentes para el HUD
+    hud_background_color = (0, 0, 0)  # Fondo de la barra superior
+    text_color = (255, 255, 255)  # Color de texto blanco
+    font = pygame.font.Font(None, 36)
+
+    # Dibuja el fondo de la barra de HUD
+    pygame.draw.rect(screen, hud_background_color, (0, 0, screen_width, 3))
+
+    # Renderiza el texto del puntaje
+    score_text = font.render(f"Puntaje: {player.points}", True, text_color)
+    score_rect = score_text.get_rect(topleft=(10, 10))
+    screen.blit(score_text, score_rect)
+
+    # Renderiza el texto del nivel
+    level_text = font.render(f"Nivel: {player.level}", True, text_color)
+    level_rect = level_text.get_rect(center=(screen_width // 2, 20))
+    screen.blit(level_text, level_rect)
+
+    # Renderiza el texto de las vidas
+    lives_text = font.render(f"Vidas: {player.lives}", True, text_color)
+    lives_rect = lives_text.get_rect(topright=(screen_width - 10, 10))
+    screen.blit(lives_text, lives_rect)
+
 #Funcion para dibujar el boton
 def draw_button(text, x, y, width, height, color, hover_color):
+    global player, map_data, posiciones_4, pacman_grid_x, pacman_grid_y, pacman_screen_x, pacman_screen_y
+    global red_ghost, pink_ghost, orange_ghost, blue_ghost
     # Obtener la posición del ratón
     mouse_pos = pygame.mouse.get_pos()
     mouse_click = pygame.mouse.get_pressed()  # Obtiene el estado de los botones del ratón
-    
     
     # Detectar si el mouse está sobre el botón
     if x < mouse_pos[0] < x + width and y < mouse_pos[1] < y + height:
@@ -171,8 +182,7 @@ def draw_button(text, x, y, width, height, color, hover_color):
         if mouse_click[0] == 1:
             # Acción al hacer clic en el botón
             if text == "Volver a jugar":
-                # Reiniciar el juego
-                reset_game()
+                initialize_game()  # Reiniciar el juego usando la función global
             elif text == "Salir":
                 # Salir del juego
                 pygame.quit()
@@ -233,18 +243,43 @@ def update_blue_ghost_target(pacman_x, pacman_y, red_ghost, next_direction):
     return final_target
 
 
-
-def reset_game():
-    # Aquí debes colocar el código para reiniciar el juego, como:
-    # - Restablecer las posiciones de Pacman y los fantasmas
-    # - Reiniciar el nivel, los puntos, las vidas, etc.
-    pass
 # Creamos una instancia de jugador para manejar vidas, nivel y puntos:
-player = Player()
-red_ghost = RedGhost()
-pink_ghost = PinkGhost()
-orange_ghost = OrangeGhost()
-blue_ghost = BlueGhost()
+def initialize_game():
+    global player, map_data, posiciones_4, pacman_grid_x, pacman_grid_y, pacman_screen_x, pacman_screen_y
+    global red_ghost, pink_ghost, orange_ghost, blue_ghost
+    global running, game_started
+    
+    # Bucle principal
+    running = True
+    game_started = False
+    
+    # Configuración inicial del juego
+    player = Player()
+    map_data, posiciones_4 = create_map_matrix(resource_path("maze1.txt"))
+    
+    # Posiciones iniciales de Pacman
+    pacman_grid_x, pacman_grid_y = 14, 21
+    pacman_screen_x, pacman_screen_y = pacman_grid_x * cell_size, pacman_grid_y * cell_size
+
+    # Inicializa los fantasmas
+    red_ghost = RedGhost()
+    pink_ghost = PinkGhost()
+    orange_ghost = OrangeGhost()
+    blue_ghost = BlueGhost()
+
+# Llama a la función para inicializar el juego al comenzar
+initialize_game()
+
+# Tamaño de la pantalla
+map_height = len(map_data)
+map_width = len(map_data[0])
+screen_width = map_width * cell_size
+screen_height = map_height * cell_size
+
+# Inicializa Pygame
+pygame.init()
+screen = pygame.display.set_mode((screen_width, screen_height))
+clock = pygame.time.Clock()
 
 def draw_start_button(game_started):
     mouse_pos = pygame.mouse.get_pos()
@@ -329,10 +364,6 @@ player_eaten = False
 death_animation_start_time = None
 death_animation_playing = False
 
-# Bucle principal
-running = True
-game_started = False
-
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -347,51 +378,6 @@ while running:
         pygame.display.flip()
         clock.tick(30)
     if game_started:
-        if player_eaten:
-            # Reducir una vida de Pacman y comprobar si queda alguna
-            print("entré a que me comieran")
-            player.lives -= 1
-            if player.lives <= 0:
-                # Dibujar el fondo
-                screen.blit(background_image, (0, 0))
-                # Mostrar "Game Over" en el centro de la pantalla
-                font = pygame.font.SysFont(None, 72)  # Tamaño de la fuente más grande
-                game_over_text = font.render("Game Over", True, (255, 255, 0))
-                
-                # Obtener el tamaño del texto para centrarlo
-                text_rect = game_over_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
-                
-                # Dibujar el texto en el centro
-                screen.blit(game_over_text, text_rect)
-                
-                # Dibujar los botones
-                draw_button("Volver a jugar", 50, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (0, 255, 0), (0, 200, 0))
-                draw_button("Salir", 300, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (255, 0, 0), (200, 0, 0))
-                
-                pygame.display.flip()
-                clock.tick(30)
-
-                pygame.time.delay(10000)
-
-                print("¡Game Over!")
-                running = False
-                continue  # Salir del bucle principal si no quedan vidas
-
-            # Reiniciar posiciones de Pacman y fantasmas
-            player_eaten = False  # Restablecer estado de 'player_eaten'
-            pacman_grid_x, pacman_grid_y = 14, 21
-            pacman_screen_x, pacman_screen_y = pacman_grid_x * cell_size, pacman_grid_y * cell_size
-            red_ghost.position_x, red_ghost.position_y = red_ghost_house_position
-            pink_ghost.position_x, pink_ghost.position_y = pink_ghost_house_position
-            orange_ghost.position_x, orange_ghost.position_y = orange_ghost_house_position
-            blue_ghost.position_x, blue_ghost.position_y = blue_ghost_house_position
-
-            # Limpiar el camino y poner a los fantasmas en modo normal
-            for ghost in [red_ghost, pink_ghost, orange_ghost, blue_ghost]:
-                ghost.path = []
-                ghost.eaten = True
-
-            # Pausar un momento para mostrar la pérdida de vida
         # Si Pacman ha sido comido, iniciar la animación de muerte
         if player_eaten and not death_animation_playing:
             death_animation_start_time = time.time()  # Registrar el tiempo de inicio de la animación
@@ -430,10 +416,6 @@ while running:
                     pygame.display.flip()
                     clock.tick(30)
 
-                    pygame.time.delay(10000)
-
-                    print("¡Game Over!")
-                    running = False
                     continue  # Salir del bucle principal si no quedan vidas
                 else:
                     # Reinicia posiciones de Pacman y fantasmas
@@ -455,7 +437,29 @@ while running:
             else:
                 # Continuar en el bucle mientras se reproduce la animación
                 continue  # Saltar el resto del bucle actual para que solo se muestre la animación
+        
+        if player.lives <= 0:
+            # Dibujar el fondo
+            screen.blit(background_image, (0, 0))
+            # Mostrar "Game Over" en el centro de la pantalla
+            font = pygame.font.SysFont(None, 72)  # Tamaño de la fuente más grande
+            game_over_text = font.render("Game Over", True, (255, 255, 0))
             
+            # Obtener el tamaño del texto para centrarlo
+            text_rect = game_over_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+            
+            # Dibujar el texto en el centro
+            screen.blit(game_over_text, text_rect)
+            
+            # Dibujar los botones
+            draw_button("Volver a jugar", 50, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (0, 255, 0), (0, 200, 0))
+            draw_button("Salir", 300, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (255, 0, 0), (200, 0, 0))
+            
+            pygame.display.flip()
+            clock.tick(30)
+
+            continue  # Salir del bucle principal si no quedan vidas
+        
         if player.level == 1:
             scatter_mode_duration = 7 # 7 segundos
         if player.level == 2:
@@ -715,6 +719,8 @@ while running:
         if blue_ghost.animate_going_home:
             move_ghost_to_house(blue_ghost, blue_ghost_house_position, ghost_eaten_gif)
 
+        draw_hud()
+        
         pygame.display.flip()
         clock.tick(30)
 
