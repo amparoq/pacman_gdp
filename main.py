@@ -349,6 +349,9 @@ pacman_death_gif = gif_pygame.load(os.path.join(gifs_path, "pacman_death.gif"))
 
 ghost_eaten_gif = gif_pygame.load(os.path.join(gifs_path, "eaten_ghost.gif"))
 
+scatter_ghost_animations_blinking = {"right": gif_pygame.load(os.path.join(gifs_path, "eatable_ghost_blinking_right.gif")), 
+                                    "left": gif_pygame.load(os.path.join(gifs_path, "eatable_ghost_blinking_left.gif"))}
+
 # Calcular el tiempo total de duración de la animación
 death_animation_duration = sum(pacman_death_gif.get_durations())
 
@@ -403,8 +406,13 @@ while running:
                     font = pygame.font.SysFont(None, 72)  # Tamaño de la fuente más grande
                     game_over_text = font.render("Game Over", True, (255, 255, 0))
                     
+                    # Muestra el puntaje total
+                    score_text = font.render(f"Puntaje Total: {player.points}", True, (255, 255, 255))
+                    score_rect = score_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+                    screen.blit(score_text, score_rect)
+                    
                     # Obtener el tamaño del texto para centrarlo
-                    text_rect = game_over_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+                    text_rect = game_over_text.get_rect(center=(screen.get_width() // 2, (screen.get_height() // 2) - 30))
                     
                     # Dibujar el texto en el centro
                     screen.blit(game_over_text, text_rect)
@@ -445,8 +453,13 @@ while running:
             font = pygame.font.SysFont(None, 72)  # Tamaño de la fuente más grande
             game_over_text = font.render("Game Over", True, (255, 255, 0))
             
+            # Muestra el puntaje total
+            score_text = font.render(f"Puntaje Total: {player.points}", True, (255, 255, 255))
+            score_rect = score_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+            screen.blit(score_text, score_rect)
+            
             # Obtener el tamaño del texto para centrarlo
-            text_rect = game_over_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+            text_rect = game_over_text.get_rect(center=(screen.get_width() // 2, (screen.get_height() // 2) - 80))
             
             # Dibujar el texto en el centro
             screen.blit(game_over_text, text_rect)
@@ -465,7 +478,7 @@ while running:
         if player.level == 2:
             scatter_mode_duration = 5 # 5 segundos
         if player.level == 3:
-            scatter_mode_duration = 3 # 7 segundos  
+            scatter_mode_duration = 4 # 7 segundos  
             
         # Obtener el objetivo para el fantasma rosado
         pink_ghost_target = update_pink_ghost_target(pacman_grid_x, pacman_grid_y, next_direction)
@@ -645,7 +658,10 @@ while running:
                 if not red_ghost.scatter_mode:
                     red_ghost_gif = red_ghost_animations[red_ghost.direction]
                 else:
-                    red_ghost_gif = scatter_ghost_animations[red_ghost.direction]
+                    if time.time() - scatter_mode_start >= scatter_mode_duration - 2:
+                       red_ghost_gif = scatter_ghost_animations_blinking[red_ghost.direction] 
+                    else:
+                        red_ghost_gif = scatter_ghost_animations[red_ghost.direction]
             red_ghost_gif.render(screen, (red_ghost_screen_x - 7, red_ghost_screen_y - 7))
 
         if not pink_ghost.animate_going_home:
@@ -654,7 +670,10 @@ while running:
                 if not pink_ghost.scatter_mode:
                     pink_ghost_gif = pink_ghost_animations[pink_ghost.direction]
                 else:
-                    pink_ghost_gif = scatter_ghost_animations[pink_ghost.direction]
+                    if time.time() - scatter_mode_start >= scatter_mode_duration - 2:
+                       pink_ghost_gif = scatter_ghost_animations_blinking[pink_ghost.direction] 
+                    else:
+                        pink_ghost_gif = scatter_ghost_animations[pink_ghost.direction]
             pink_ghost_gif.render(screen, (pink_ghost_screen_x - 7, pink_ghost_screen_y - 7))
             
         if not orange_ghost.animate_going_home:
@@ -663,7 +682,10 @@ while running:
                 if not orange_ghost.scatter_mode:
                     orange_ghost_gif = orange_ghost_animations[orange_ghost.direction]
                 else:
-                    orange_ghost_gif = scatter_ghost_animations[orange_ghost.direction]
+                    if time.time() - scatter_mode_start >= scatter_mode_duration - 2:
+                       orange_ghost_gif = scatter_ghost_animations_blinking[orange_ghost.direction] 
+                    else:
+                        orange_ghost_gif = scatter_ghost_animations[orange_ghost.direction]
             orange_ghost_gif.render(screen, (orange_ghost_screen_x - 7, orange_ghost_screen_y - 7))
 
         if not blue_ghost.animate_going_home:
@@ -672,7 +694,10 @@ while running:
                 if not blue_ghost.scatter_mode:
                     blue_ghost_gif = blue_ghost_animations[blue_ghost.direction]
                 else:
-                    blue_ghost_gif = scatter_ghost_animations[blue_ghost.direction]
+                    if time.time() - scatter_mode_start >= scatter_mode_duration - 2:
+                       blue_ghost_gif = scatter_ghost_animations_blinking[blue_ghost.direction]
+                    else: 
+                        blue_ghost_gif = scatter_ghost_animations[blue_ghost.direction]
             blue_ghost_gif.render(screen, (blue_ghost_screen_x - 7, blue_ghost_screen_y - 7))
             
         # Detectar colisiones entre Pacman y cada fantasma
