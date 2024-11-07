@@ -27,7 +27,7 @@ jobs:
     - name: Build executable
       shell: bash
       run: |
-        pyinstaller --onefile --add-data="gifs;gifs" --add-data="menus;menus" --add-data="maze1.txt;." main.py --name pacman_ampi
+        pyinstaller --onefile --add-data="gifs;gifs" --add-data="menus;menus" --add-data="sfx;sfx" --add-data="maze1.txt;." main.py --name pacman_ampi
 
 
     - name: Upload artifact

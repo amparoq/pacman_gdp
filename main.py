@@ -24,6 +24,7 @@ def resource_path(relative_path):
 
 gifs_path = resource_path("gifs")
 images_path = resource_path("menus")
+sfx_path = resource_path("sfx")
 
 #Cargar imagen de fondo
 background_image = pygame.image.load(os.path.join(images_path, "game_over.png"))
@@ -31,8 +32,17 @@ background_image = pygame.image.load(os.path.join(images_path, "game_over.png"))
 
 #Cargar imagen de fondo
 #background_image = pygame.image.load("game_over.png")
-start_screen_image = pygame.image.load(os.path.join(images_path, "start.png"))
+start_screen_image = pygame.image.load(os.path.join(images_path,"start.png"))
 
+
+# Load sound effects
+pygame.mixer.init()
+
+death_sound = pygame.mixer.Sound(os.path.join(sfx_path, "death.mp3"))
+ghost_eaten_sound = pygame.mixer.Sound(os.path.join(sfx_path, "ghost_eaten.mp3"))
+ghost_eating_sound = pygame.mixer.Sound(os.path.join(sfx_path, "ghost_eating.mp3"))
+power_pellet_sound = pygame.mixer.Sound(os.path.join(sfx_path, "power_pellet.mp3"))
+waka_sound = pygame.mixer.Sound(os.path.join(sfx_path, "wakawakaish.mp3"))
 
 GREEN = (0, 255, 0)
 DARK_GREEN = (0, 200, 0)
@@ -42,7 +52,7 @@ DARK_RED = (200, 0, 0)
 # Dimensiones de los botones
 START_BUTTON_X, START_BUTTON_Y = 110, 250
 START_BUTTON_WIDTH, START_BUTTON_HEIGHT = 150, 50
-EXIT_BUTTON_X, EXIT_BUTTON_Y = 330, 250
+EXIT_BUTTON_X, EXIT_BUTTON_Y = 280, 250
 EXIT_BUTTON_WIDTH, EXIT_BUTTON_HEIGHT = 150, 50
 
 
@@ -371,6 +381,10 @@ death_animation_playing = False
 
 game_won = False
 
+# Control de sonido para evitar reproducción desordenada
+power_pellet_active = False
+death_sound_played = False
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -384,13 +398,15 @@ while running:
         game_started=draw_start_button(game_started)        
         pygame.display.flip()
         clock.tick(30)
+
+    
     if game_started:
         # Si Pacman ha sido comido, iniciar la animación de muerte
         if player_eaten and not death_animation_playing:
             death_animation_start_time = time.time()  # Registrar el tiempo de inicio de la animación
             death_animation_playing = True  # Activar el estado de animación
             pacman_death_gif.reset()  # Reiniciar el GIF al primer fotograma
-
+            death_sound.play()
         # Reproduce la animación de muerte si está activa
         if death_animation_playing:
             pacman_death_gif.render(screen, (pacman_screen_x - 7, pacman_screen_y - 7))
@@ -590,9 +606,19 @@ while running:
         # Cambiar el map_data (la matriz) segun la posicion de pacman
         # Acá se come los pellets
         if map_data[pacman_grid_y][pacman_grid_x] == 1:
+            waka_sound.play()
             map_data[pacman_grid_y][pacman_grid_x] = 0 
             player.pellets_eaten += 1
             player.points += 10
+
+
+        if map_data[pacman_grid_y][pacman_grid_x] == 2 and not power_pellet_active:
+            power_pellet_sound.play()
+            power_pellet_active = True  # Marcar que el sonido de power pellet está activo
+        elif map_data[pacman_grid_y][pacman_grid_x] != 2 and power_pellet_active:
+            power_pellet_active = False  # Restablecer si ya no está en el estado del power pellet
+
+
         if map_data[pacman_grid_y][pacman_grid_x] == 2:
             map_data[pacman_grid_y][pacman_grid_x] = 0 
             player.pellets_eaten += 1
@@ -604,6 +630,7 @@ while running:
             blue_ghost.scatter_mode = True
             
             scatter_mode_start = time.time()
+            power_pellet_sound.play()
         
         if red_ghost.scatter_mode and (time.time() - scatter_mode_start >= scatter_mode_duration):
             red_ghost.scatter_mode = False
@@ -734,6 +761,7 @@ while running:
         # Detectar colisiones entre Pacman y cada fantasma
         if pacman_rect.colliderect(red_ghost_rect):
             if red_ghost.scatter_mode:
+                ghost_eating_sound.play()
                 ghost_captured += 1
                 player.points += 200 * ghost_captured
                 red_ghost.animate_going_home = True
@@ -768,12 +796,16 @@ while running:
         # En el bucle principal, mueve los fantasmas a la casa si están en modo "comido"
         if red_ghost.animate_going_home:
             move_ghost_to_house(red_ghost, red_ghost_house_position, ghost_eaten_gif)
+            ghost_eaten_sound.play()
         if pink_ghost.animate_going_home:
             move_ghost_to_house(pink_ghost, pink_ghost_house_position, ghost_eaten_gif)
+            ghost_eaten_sound.play()
         if orange_ghost.animate_going_home:
             move_ghost_to_house(orange_ghost, orange_ghost_house_position, ghost_eaten_gif)
+            ghost_eaten_sound.play()
         if blue_ghost.animate_going_home:
             move_ghost_to_house(blue_ghost, blue_ghost_house_position, ghost_eaten_gif)
+            ghost_eaten_sound.play()
 
         draw_hud()
         
