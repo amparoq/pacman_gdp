@@ -247,7 +247,7 @@ def update_blue_ghost_target(pacman_x, pacman_y, red_ghost, next_direction):
 def initialize_game():
     global player, map_data, posiciones_4, pacman_grid_x, pacman_grid_y, pacman_screen_x, pacman_screen_y
     global red_ghost, pink_ghost, orange_ghost, blue_ghost
-    global running, game_started
+    global running, game_started, game_won
     
     # Bucle principal
     running = True
@@ -260,6 +260,8 @@ def initialize_game():
     # Posiciones iniciales de Pacman
     pacman_grid_x, pacman_grid_y = 14, 21
     pacman_screen_x, pacman_screen_y = pacman_grid_x * cell_size, pacman_grid_y * cell_size
+
+    game_won = False
 
     # Inicializa los fantasmas
     red_ghost = RedGhost()
@@ -367,6 +369,8 @@ player_eaten = False
 death_animation_start_time = None
 death_animation_playing = False
 
+game_won = False
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -445,6 +449,34 @@ while running:
             else:
                 # Continuar en el bucle mientras se reproduce la animación
                 continue  # Saltar el resto del bucle actual para que solo se muestre la animación
+        
+        if game_won:
+            # Dibujar el fondo
+            screen.blit(background_image, (0, 0))
+            # Mostrar "Game Over" en el centro de la pantalla
+            font = pygame.font.SysFont(None, 72)  # Tamaño de la fuente más grande
+            game_over_text = font.render("¡Has ganado!", True, (255, 255, 0))
+            
+            # Muestra el puntaje total
+            score_text = font.render(f"Puntaje Total: {player.points}", True, (255, 255, 255))
+            score_rect = score_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+            screen.blit(score_text, score_rect)
+            
+            # Obtener el tamaño del texto para centrarlo
+            text_rect = game_over_text.get_rect(center=(screen.get_width() // 2, (screen.get_height() // 2) - 40))
+            
+            # Dibujar el texto en el centro
+            screen.blit(game_over_text, text_rect)
+            
+            # Dibujar los botones
+            draw_button("Volver a jugar", 50, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (0, 255, 0), (0, 200, 0))
+            draw_button("Salir", 300, 370 + BUTTON_HEIGHT + 20, BUTTON_WIDTH, BUTTON_HEIGHT, (255, 0, 0), (200, 0, 0))
+            
+            
+            pygame.display.flip()
+            clock.tick(30)
+
+            continue  # Salir del bucle principal si no quedan vidas
         
         if player.lives <= 0:
             # Dibujar el fondo
@@ -613,8 +645,8 @@ while running:
             print("¡Paso de nivel!")
             # Reinicio todo
             player.level += 1
-            if player.level == 3:
-                print("¡Ganaste!")
+            if player.level > 3:
+                game_won = True
             
             player.pellets_eaten = 0
             
@@ -642,8 +674,7 @@ while running:
             pygame.display.flip()
             time.sleep(2)
             continue 
-            
-
+        
         # Dibujar a Pacman en la posición de pantalla correspondiente
         pacman_rect = pygame.Rect(int(pacman_screen_x), int(pacman_screen_y), cell_size, cell_size)
         if direction:
