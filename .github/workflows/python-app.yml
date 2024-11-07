@@ -10,28 +10,27 @@ jobs:
         os: [windows-latest]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4  # Actualizado a la versión v4
+      - name: Checkout code
+        uses: actions/checkout@v4 # Actualizado a la versión v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4  # Actualizado a la versión v4
-      with:
-        python-version: 3.9
+      - name: Set up Python
+        uses: actions/setup-python@v4 # Actualizado a la versión v4
+        with:
+          python-version: 3.9
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pyinstaller
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
 
-    - name: Build executable
-      shell: bash
-      run: |
-        pyinstaller --onefile --add-data="gifs;gifs" --add-data="menus;menus" --add-data="maze1.txt;." main.py --name pacman_ampi
+      - name: Build executable
+        shell: bash
+        run: |
+          pyinstaller --onefile --add-data="gifs;gifs" --add-data="menus;menus" --add-data="sfx;sfx" --add-data="maze1.txt;." main.py --name pacman_ampi
 
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4  # Actualizado a la versión v4
-      with:
-        name: pacman_ampi-${{ matrix.os }}
-        path: dist/pacman_ampi*
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4 # Actualizado a la versión v4
+        with:
+          name: pacman_ampi-${{ matrix.os }}
+          path: dist/pacman_ampi*
